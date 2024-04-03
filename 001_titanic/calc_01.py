@@ -2,6 +2,7 @@ import os
 
 import pandas as pd
 import numpy as np
+from sklearn import tree
 
 import common_export_csv
 import common_logger    
@@ -45,10 +46,34 @@ gp_csv = pd.read_csv(os.path.join(Calc_01_HENSU.DATA_SETS_PATH,'gender_submissio
 train_csv = pd.read_csv(os.path.join(Calc_01_HENSU.DATA_SETS_PATH,'train.csv'))
 test_csv = pd.read_csv(os.path.join(Calc_01_HENSU.DATA_SETS_PATH,'test.csv'))
 
-tmp = gp_csv.columns.to_list()
-tmp.append(test_csv.columns.to_list())
-print(tmp)
-# set(tmp.append([test_csv.columns.to_list()]))
+# testとtrainのカラム一致確認
+correct = set(gp_csv.columns.to_list() + test_csv.columns.to_list()) == set(train_csv.columns.to_list()) 
+print(correct)
+
+
+# ゴミ列削除
+train_csv = train_csv.drop(columns='Name')
+# test_csv = test_csv.drop(columns='Name')
+
+# 前処理（欠損値の補完）
+train_csv['Embarked'].fillna('S')
+train_csv['Embarked'].fillna(train_csv['Age'].median())
+
+# 前処理（文字列→数値変換）
+train_csv[train_csv['Sex']=='female'] = 0
+train_csv[train_csv['Sex']=='male'] = 1
+train_csv[train_csv['Embarked']=='S'] = 0
+train_csv[train_csv['Embarked']=='C'] = 1
+train_csv[train_csv['Embarked']=='Q'] = 2
+
+# print(train_csv.head(3))
+# print(test_csv.head(3))
+# print(gp_csv.describe())
+print(train_csv.describe())
+
+# print(test_csv['Ticket'].isnull().sum())
+# print(len(test_csv['Ticket'].unique()))
+# print(test_csv.columns.to_list())
 
 # tmp = set(list[test_csv.columns.to_list(),gp_csv.columns.to_list()])
 # print(tmp==test_csv.columns.to_list())
