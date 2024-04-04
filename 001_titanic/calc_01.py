@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import pandas as pd
 import numpy as np
@@ -8,7 +9,6 @@ import common_export_csv
 import common_logger    
 
 # # ログの出力
-# 
 # logs.out_put_Log('test2', common_logger.Log_Levels.CRITICAL)
 
 class Calc_01_HENSU:
@@ -23,7 +23,9 @@ class Calc_01_FUNC:
 
     def __init__(self)-> None:
         # ログクラスのインスタンス化（仮）
-        logs = common_logger.CommonLogger('test.log')
+        logs = common_logger.CommonLogger(Calc_01_HENSU.MYPJ_PATH,\
+                                          str(datetime.now().strftime('%Y-%m-%d')) +'_test.log')
+                                        # datetime.now().strftime('%Y-%m-%d %H:%M:%S') + 
 
         # 分析ファイル格納用のフォルダを作成
         Calc_01_HENSU.CALC_FOLDER_PATH  = os.path.join(Calc_01_HENSU.MYPJ_PATH, '01_calc')
@@ -53,7 +55,7 @@ print(correct)
 
 # ゴミ列削除
 train_csv = train_csv.drop(columns='Name')
-# test_csv = test_csv.drop(columns='Name')
+test_csv = test_csv.drop(columns='Name')
 
 # 前処理（欠損値の補完）
 train_csv['Embarked'].fillna('S')

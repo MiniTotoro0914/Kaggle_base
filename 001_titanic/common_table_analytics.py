@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import pandas as pd
 import numpy as np
@@ -19,7 +20,8 @@ class Table_Analytics_Func:
 
     def __init__(self)-> None:
         # ログクラスのインスタンス化（仮）
-        logs = common_logger.CommonLogger('Table_Analytics.log')
+        logs = common_logger.CommonLogger(Table_Analytics_Hensu.MYPJ_PATH,\
+                                          str(datetime.now().strftime('%Y-%m-%d')) +'_Table_Analytics.log')
 
         # 分析ファイル格納用のフォルダを作成
         Table_Analytics_Hensu.CALC_FOLDER_PATH  = os.path.join(Table_Analytics_Hensu.MYPJ_PATH, '02_data_set_analytics')
