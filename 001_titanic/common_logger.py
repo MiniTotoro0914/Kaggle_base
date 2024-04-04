@@ -13,7 +13,7 @@ class Log_Levels(Enum):
 
 class CommonLogger:
 
-    def __init__(self, folder_path,log_file):
+    def __init__(self, folder_path,log_file,encode:str='utf-8'):
                 # 分析ファイル格納用のフォルダを作成
         tmp = os.path.join(folder_path,'03_logs')
         if not os.path.exists(tmp):
@@ -25,10 +25,10 @@ class CommonLogger:
         
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
         
-        file_handler = logging.FileHandler(self.log_file)
+        file_handler = logging.FileHandler(filename= self.log_file, encoding=encode)
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
-        
+
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.INFO)
         console_handler.setFormatter(formatter)
