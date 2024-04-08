@@ -15,7 +15,7 @@ class Table_Analytics_Hensu:
     DATA_SETS_PATH  = os.path.join(MYPJ_PATH, 'datasets')
     CALC_FOLDER_PATH = ''
     ANALYTICS_RESULT_FOLDER_PATH = ''
-    # PJ固有の持ち回りDataFrame
+    # PJ固有の持ち回りDataFrame 個別部分
     gp_csv = pd.DataFrame()
     train_csv = pd.DataFrame()
     test_csv = pd.DataFrame()
@@ -44,8 +44,7 @@ class Table_Analytics_Func:
     def __read_csv__(self,file_name,path=Table_Analytics_Hensu.DATA_SETS_PATH) -> None:
         return pd.read_csv(os.path.join(path,file_name))
     
-
-    def __analytics_kesson_table__(self,df)-> None: 
+    def __common_analytics_kesson_table__(self,df)-> None: 
             null_val = df.isnull().sum()
             percent = 100 * df.isnull().sum()/len(df)
             kesson_table = pd.concat([null_val, percent], axis=1)
@@ -64,13 +63,13 @@ class Table_Analytics_Func:
         return 'test'
 
     # 読込処理
-    def __read_csvs__(self)-> None:
+    def __call_read_csvs__(self)-> None:
         Table_Analytics_Hensu.gp_csv = TAF.__read_csv__(file_name='gender_submission.csv')
         Table_Analytics_Hensu.train_csv = TAF.__read_csv__(file_name='train.csv')
         Table_Analytics_Hensu.test_csv = TAF.__read_csv__(file_name='test.csv')    
 
-    # 統計量のチェックと欠損値のチェック
-    def __data_checks__(self)-> None:
+    # 統計量のチェックと欠損値のチェック（一応 個別部分）
+    def __call_data_checks__(self)-> None:
         # 統計量抽出
         Table_Analytics_Hensu.gp_csv.describe().to_csv( \
             os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'gp_csv_describe.csv'))
@@ -84,11 +83,11 @@ class Table_Analytics_Func:
         self.logs.out_put_Log('生成ファイル : test_csv_describe.csv', common_logger.Log_Levels.INFO)
 
         # 欠損値確認
-        TAF.__analytics_kesson_table__(Table_Analytics_Hensu.gp_csv).to_csv( \
+        TAF.__common_analytics_kesson_table__(Table_Analytics_Hensu.gp_csv).to_csv( \
             os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'gp_csv_kesson.csv'))
-        TAF.__analytics_kesson_table__(Table_Analytics_Hensu.train_csv).to_csv( \
+        TAF.__common_analytics_kesson_table__(Table_Analytics_Hensu.train_csv).to_csv( \
             os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'train_csv_kesson.csv'))
-        TAF.__analytics_kesson_table__(Table_Analytics_Hensu.test_csv).to_csv( \
+        TAF.__common_analytics_kesson_table__(Table_Analytics_Hensu.test_csv).to_csv( \
             os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'test_csv_kesson.csv'))
         self.logs.out_put_Log('欠損値の確認が完了しました。', common_logger.Log_Levels.INFO)
         self.logs.out_put_Log('生成ファイル : gp_csv_describe.csv', common_logger.Log_Levels.INFO)
@@ -102,42 +101,53 @@ class Table_Analytics_Func:
         self.logs.out_put_Log(f'訓練用とテスト用の項目数チェック【{correct}】', common_logger.Log_Levels.INFO)
 
     # 補正（欠損値の保管・文字列データの数値化
-    def __data_complement__(self)-> None:
+    def __custom_data_complements__(self)-> None:
+        # ゴミデータ削除 - 1
+        # 使わない列のゴミ列削除
+        Table_Analytics_Hensu.train_csv = Table_Analytics_Hensu.train_csv.drop(columns='Name')
+        Table_Analytics_Hensu.test_csv = Table_Analytics_Hensu.test_csv.drop(columns='Name')
 
+        # 前処理 - 1
+        # 欠損値の補完
+        # Embarked・・・出港地の欠損値をSで補完
+        # Age・・・年齢の欠損値を中央値で補完
+        Table_Analytics_Hensu.train_csv['Embarked'].fillna('S')
+        Table_Analytics_Hensu.train_csv['Embarked'].fillna(\
+            Table_Analytics_Hensu.train_csv['Age'].median())
+        Table_Analytics_Hensu.test_csv['Embarked'].fillna('S')
+        Table_Analytics_Hensu.test_csv['Embarked'].fillna(\
+            Table_Analytics_Hensu.test_csv['Age'].median())
+
+        # 前処理 - 2
+        # 文字リテラル → 数値 の変換
+        # Sex・・・female：0、male：1
+        # Embarked・・・S：0、C：1、Q：2
+        Table_Analytics_Hensu.train_csv[Table_Analytics_Hensu.train_csv['Sex']=='female'] = 0
+        Table_Analytics_Hensu.train_csv[Table_Analytics_Hensu.train_csv['Sex']=='male'] = 1
+        Table_Analytics_Hensu.train_csv[Table_Analytics_Hensu.train_csv['Embarked']=='S'] = 0
+        Table_Analytics_Hensu.train_csv[Table_Analytics_Hensu.train_csv['Embarked']=='C'] = 1
+        Table_Analytics_Hensu.train_csv[Table_Analytics_Hensu.train_csv['Embarked']=='Q'] = 2
+        Table_Analytics_Hensu.test_csv[Table_Analytics_Hensu.test_csv['Sex']=='female'] = 0
+        Table_Analytics_Hensu.test_csv[Table_Analytics_Hensu.test_csv['Sex']=='male'] = 1
+        Table_Analytics_Hensu.test_csv[Table_Analytics_Hensu.test_csv['Embarked']=='S'] = 0
+        Table_Analytics_Hensu.test_csv[Table_Analytics_Hensu.test_csv['Embarked']=='C'] = 1
+        Table_Analytics_Hensu.test_csv[Table_Analytics_Hensu.test_csv['Embarked']=='Q'] = 2
 
 TAF = Table_Analytics_Func()
-TAF.__read_csvs__()    
-TAF.__data_checks__()
+TAF.__call_read_csvs__()
+TAF.__call_data_checks__()
+# 前処理（欠損値の補完）ロジック
+TAF.__custom_data_complements__()
+TAF.__call_data_checks__()
 
 
 
 
-# # 使わない列のゴミ列削除
-# train_csv = train_csv.drop(columns='Name')
-# # test_csv = test_csv.drop(columns='Name')
-
-# # 前処理（欠損値の補完）
-# train_csv['Embarked'].fillna('S')
-# train_csv['Embarked'].fillna(train_csv['Age'].median())
-# test_csv['Embarked'].fillna('S')
-# test_csv['Embarked'].fillna(test_csv['Age'].median())
-
-# # 前処理（文字列→数値変換）
-# train_csv[train_csv['Sex']=='female'] = 0
-# train_csv[train_csv['Sex']=='male'] = 1
-# train_csv[train_csv['Embarked']=='S'] = 0
-# train_csv[train_csv['Embarked']=='C'] = 1
-# train_csv[train_csv['Embarked']=='Q'] = 2
-# test_csv[test_csv['Sex']=='female'] = 0
-# test_csv[test_csv['Sex']=='male'] = 1
-# test_csv[test_csv['Embarked']=='S'] = 0
-# test_csv[test_csv['Embarked']=='C'] = 1
-# test_csv[test_csv['Embarked']=='Q'] = 2
 
 
-# # 補完後の欠損値確認
-# TAF.__analytics_kesson_table__(train_csv).to_csv(os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'train_csv_kesson_hokan.csv'))
-# TAF.__analytics_kesson_table__(test_csv).to_csv(os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'test_csv_kesson_hokan.csv'))
+# 補完後の欠損値確認
+# TAF.__common_analytics_kesson_table__(train_csv).to_csv(os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'train_csv_kesson_hokan.csv'))
+# TAF.__common_analytics_kesson_table__(test_csv).to_csv(os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'test_csv_kesson_hokan.csv'))
 
 # # print(train_csv.head(3))
 # # print(test_csv.head(3))
