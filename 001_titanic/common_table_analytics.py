@@ -69,14 +69,14 @@ class Table_Analytics_Func:
         Table_Analytics_Hensu.test_csv = TAF.__read_csv__(file_name='test.csv')    
 
     # 統計量のチェックと欠損値のチェック（一応 個別部分）
-    def __call_data_checks__(self)-> None:
+    def __call_data_checks__(self,sufix:str='')-> None:
         # 統計量抽出
         Table_Analytics_Hensu.gp_csv.describe().to_csv( \
-            os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'gp_csv_describe.csv'))
+            os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,f'gp_csv_describe{sufix}.csv'))
         Table_Analytics_Hensu.train_csv.describe().to_csv( \
-            os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'train_csv_describe.csv'))
+            os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,f'train_csv_describe{sufix}.csv'))
         Table_Analytics_Hensu.test_csv.describe().to_csv( \
-            os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'test_csv_describe.csv'))
+            os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,f'test_csv_describe{sufix}.csv'))
         self.logs.out_put_Log('統計量の抽出が完了しました。', common_logger.Log_Levels.INFO)
         self.logs.out_put_Log('生成ファイル : gp_csv_describe.csv', common_logger.Log_Levels.INFO)
         self.logs.out_put_Log('生成ファイル : train_csv_describe.csv', common_logger.Log_Levels.INFO)
@@ -138,7 +138,7 @@ TAF.__call_read_csvs__()
 TAF.__call_data_checks__()
 # 前処理（欠損値の補完）ロジック
 TAF.__custom_data_complements__()
-TAF.__call_data_checks__()
+TAF.__call_data_checks__(sufix='_After_Complement')
 
 
 
