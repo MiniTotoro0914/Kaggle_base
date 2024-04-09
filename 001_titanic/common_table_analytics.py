@@ -6,7 +6,8 @@ import numpy as np
 from sklearn import tree
 
 import common_export_csv
-import common_logger    
+import common_logger
+import decision_tree    
 
 class Table_Analytics_Hensu:
 
@@ -35,6 +36,13 @@ class Table_Analytics_Func:
         else:
             self.logs.out_put_Log('ログ格納フォルダは存在したのでスキップします。', common_logger.Log_Levels.INFO)
 
+        Table_Analytics_Hensu.ANALYTICS_RESULT_FOLDER_PATH = os.path.join(Table_Analytics_Hensu.MYPJ_PATH, '11_result')
+        if not os.path.exists(Table_Analytics_Hensu.ANALYTICS_RESULT_FOLDER_PATH):
+            os.makedirs(Table_Analytics_Hensu.ANALYTICS_RESULT_FOLDER_PATH)
+            self.logs.out_put_Log('11_resultフォルダを作成しました。', common_logger.Log_Levels.INFO)
+        else:
+            self.logs.out_put_Log('分析結果フォルダは存在したのでスキップします。', common_logger.Log_Levels.INFO)
+
 
     # 分析結果の格納（中身は未作成）
     def __aynalytics_result_put__(self)-> None:
@@ -42,7 +50,8 @@ class Table_Analytics_Func:
 
     # 読込処理
     def __read_csv__(self,file_name,path=Table_Analytics_Hensu.DATA_SETS_PATH) -> None:
-        return pd.read_csv(os.path.join(path,file_name))
+        print(os.path.join(path,file_name))
+        return pd.read_csv(os.path.join(path,file_name), index_col=None)
     
     def __common_analytics_kesson_table__(self,df)-> None: 
             null_val = df.isnull().sum()
@@ -122,16 +131,16 @@ class Table_Analytics_Func:
         # 文字リテラル → 数値 の変換
         # Sex・・・female：0、male：1
         # Embarked・・・S：0、C：1、Q：2
-        Table_Analytics_Hensu.train_csv[Table_Analytics_Hensu.train_csv['Sex']=='female'] = 0
-        Table_Analytics_Hensu.train_csv[Table_Analytics_Hensu.train_csv['Sex']=='male'] = 1
-        Table_Analytics_Hensu.train_csv[Table_Analytics_Hensu.train_csv['Embarked']=='S'] = 0
-        Table_Analytics_Hensu.train_csv[Table_Analytics_Hensu.train_csv['Embarked']=='C'] = 1
-        Table_Analytics_Hensu.train_csv[Table_Analytics_Hensu.train_csv['Embarked']=='Q'] = 2
-        Table_Analytics_Hensu.test_csv[Table_Analytics_Hensu.test_csv['Sex']=='female'] = 0
-        Table_Analytics_Hensu.test_csv[Table_Analytics_Hensu.test_csv['Sex']=='male'] = 1
-        Table_Analytics_Hensu.test_csv[Table_Analytics_Hensu.test_csv['Embarked']=='S'] = 0
-        Table_Analytics_Hensu.test_csv[Table_Analytics_Hensu.test_csv['Embarked']=='C'] = 1
-        Table_Analytics_Hensu.test_csv[Table_Analytics_Hensu.test_csv['Embarked']=='Q'] = 2
+        Table_Analytics_Hensu.train_csv['Sex'][Table_Analytics_Hensu.train_csv['Sex']=='female'] = 0
+        Table_Analytics_Hensu.train_csv['Sex'][Table_Analytics_Hensu.train_csv['Sex']=='male'] = 1
+        Table_Analytics_Hensu.train_csv['Embarked'][Table_Analytics_Hensu.train_csv['Embarked']=='S'] = 0
+        Table_Analytics_Hensu.train_csv['Embarked'][Table_Analytics_Hensu.train_csv['Embarked']=='C'] = 1
+        Table_Analytics_Hensu.train_csv['Embarked'][Table_Analytics_Hensu.train_csv['Embarked']=='Q'] = 2
+        Table_Analytics_Hensu.test_csv['Sex'][Table_Analytics_Hensu.test_csv['Sex']=='female'] = 0
+        Table_Analytics_Hensu.test_csv['Sex'][Table_Analytics_Hensu.test_csv['Sex']=='male'] = 1
+        Table_Analytics_Hensu.test_csv['Embarked'][Table_Analytics_Hensu.test_csv['Embarked']=='S'] = 0
+        Table_Analytics_Hensu.test_csv['Embarked'][Table_Analytics_Hensu.test_csv['Embarked']=='C'] = 1
+        Table_Analytics_Hensu.test_csv['Embarked'][Table_Analytics_Hensu.test_csv['Embarked']=='Q'] = 2
 
 TAF = Table_Analytics_Func()
 TAF.__call_read_csvs__()
@@ -140,12 +149,12 @@ TAF.__call_data_checks__()
 TAF.__custom_data_complements__()
 TAF.__call_data_checks__(sufix='_After_Complement')
 
+decision_tree.calc_type_01(Table_Analytics_Hensu.train_csv,Table_Analytics_Hensu.test_csv,\
+                   os.path.join(Table_Analytics_Hensu.ANALYTICS_RESULT_FOLDER_PATH,\
+                                '01_decision_tree_03.csv'))
 
 
-
-
-
-# 補完後の欠損値確認
+# 補完後の欠(損値確認
 # TAF.__common_analytics_kesson_table__(train_csv).to_csv(os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'train_csv_kesson_hokan.csv'))
 # TAF.__common_analytics_kesson_table__(test_csv).to_csv(os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'test_csv_kesson_hokan.csv'))
 
