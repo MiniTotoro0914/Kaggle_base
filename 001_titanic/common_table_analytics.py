@@ -109,7 +109,7 @@ class Table_Analytics_Func:
                           set(Table_Analytics_Hensu.train_csv.columns.to_list()) 
         self.logs.out_put_Log(f'訓練用とテスト用の項目数チェック【{correct}】', common_logger.Log_Levels.INFO)
 
-    # 補正（欠損値の保管・文字列データの数値化
+    # 補正（欠損値の保管・文字列データの数値化）
     def __custom_data_complements__(self)-> None:
         # ゴミデータ削除 - 1
         # 使わない列のゴミ列削除
@@ -129,64 +129,38 @@ class Table_Analytics_Func:
 
         # 前処理 - 2
         # 文字リテラル → 数値 の変換
-        # Sex・・・female：0、male：1
-        # Embarked・・・S：0、C：1、Q：2
-        Table_Analytics_Hensu.train_csv['Sex'][Table_Analytics_Hensu.train_csv['Sex']=='female'] = 0
-        Table_Analytics_Hensu.train_csv['Sex'][Table_Analytics_Hensu.train_csv['Sex']=='male'] = 1
-        Table_Analytics_Hensu.train_csv['Embarked'][Table_Analytics_Hensu.train_csv['Embarked']=='S'] = 0
-        Table_Analytics_Hensu.train_csv['Embarked'][Table_Analytics_Hensu.train_csv['Embarked']=='C'] = 1
-        Table_Analytics_Hensu.train_csv['Embarked'][Table_Analytics_Hensu.train_csv['Embarked']=='Q'] = 2
-        Table_Analytics_Hensu.test_csv['Sex'][Table_Analytics_Hensu.test_csv['Sex']=='female'] = 0
-        Table_Analytics_Hensu.test_csv['Sex'][Table_Analytics_Hensu.test_csv['Sex']=='male'] = 1
-        Table_Analytics_Hensu.test_csv['Embarked'][Table_Analytics_Hensu.test_csv['Embarked']=='S'] = 0
-        Table_Analytics_Hensu.test_csv['Embarked'][Table_Analytics_Hensu.test_csv['Embarked']=='C'] = 1
-        Table_Analytics_Hensu.test_csv['Embarked'][Table_Analytics_Hensu.test_csv['Embarked']=='Q'] = 2
+        # Sex・・・female：1、male：2
+        # Embarked・・・S：1、C：2、Q：3
+        Table_Analytics_Hensu.train_csv['Sex'][Table_Analytics_Hensu.train_csv['Sex']=='female'] = 1
+        Table_Analytics_Hensu.train_csv['Sex'][Table_Analytics_Hensu.train_csv['Sex']=='male'] = 2
+        Table_Analytics_Hensu.train_csv['Embarked'][Table_Analytics_Hensu.train_csv['Embarked']=='S'] = 1
+        Table_Analytics_Hensu.train_csv['Embarked'][Table_Analytics_Hensu.train_csv['Embarked']=='C'] = 2
+        Table_Analytics_Hensu.train_csv['Embarked'][Table_Analytics_Hensu.train_csv['Embarked']=='Q'] = 3
+        Table_Analytics_Hensu.test_csv['Sex'][Table_Analytics_Hensu.test_csv['Sex']=='female'] = 1
+        Table_Analytics_Hensu.test_csv['Sex'][Table_Analytics_Hensu.test_csv['Sex']=='male'] = 2
+        Table_Analytics_Hensu.test_csv['Embarked'][Table_Analytics_Hensu.test_csv['Embarked']=='S'] = 1
+        Table_Analytics_Hensu.test_csv['Embarked'][Table_Analytics_Hensu.test_csv['Embarked']=='C'] = 2
+        Table_Analytics_Hensu.test_csv['Embarked'][Table_Analytics_Hensu.test_csv['Embarked']=='Q'] = 3
+        # Table_Analytics_Hensu.train_csv['Age_Sex']= Table_Analytics_Hensu.train_csv['Age'] * Table_Analytics_Hensu.train_csv['Sex']
+        # Table_Analytics_Hensu.test_csv['Age_Sex']= Table_Analytics_Hensu.test_csv['Age'] * Table_Analytics_Hensu.test_csv['Sex']
+
+    # 補正（カスタム項目の生成）
+    def __custom_data_complements_column__(self)-> None:
+        # 前処理 - 2
+        Table_Analytics_Hensu.train_csv['Age_Sex']= Table_Analytics_Hensu.train_csv['Age'] * Table_Analytics_Hensu.train_csv['Sex']
+        Table_Analytics_Hensu.test_csv['Age_Sex']= Table_Analytics_Hensu.test_csv['Age'] * Table_Analytics_Hensu.test_csv['Sex']
+
 
 TAF = Table_Analytics_Func()
 TAF.__call_read_csvs__()
 TAF.__call_data_checks__()
 # 前処理（欠損値の補完）ロジック
 TAF.__custom_data_complements__()
+# TAF.__custom_data_complements_column__()
 TAF.__call_data_checks__(sufix='_After_Complement')
 
+calc_param = ["Pclass", "Sex", "Age", "Fare","SibSp","Parch","Embarked"]
+file_name = '01_decision_tree_04.csv'
 decision_tree.calc_type_01(Table_Analytics_Hensu.train_csv,Table_Analytics_Hensu.test_csv,\
                    os.path.join(Table_Analytics_Hensu.ANALYTICS_RESULT_FOLDER_PATH,\
-                                '01_decision_tree_03.csv'))
-
-
-# 補完後の欠(損値確認
-# TAF.__common_analytics_kesson_table__(train_csv).to_csv(os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'train_csv_kesson_hokan.csv'))
-# TAF.__common_analytics_kesson_table__(test_csv).to_csv(os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'test_csv_kesson_hokan.csv'))
-
-# # print(train_csv.head(3))
-# # print(test_csv.head(3))
-# # print(gp_csv.describe())
-# # print(train_csv.describe())
-
-# # print(test_csv['Ticket'].isnull().sum())
-# # print(len(test_csv['Ticket'].unique()))
-# # print(test_csv.columns.to_list())
-
-# # tmp = set(list[test_csv.columns.to_list(),gp_csv.columns.to_list()])
-# # print(tmp==test_csv.columns.to_list())
-# # train_dataの概観
-# # print(train_csv.columns.to_list())
-
-# # # test_dataの概観
-# # print(test_csv.columns.to_list())
-
-# # common_export_csv.export_csv_datasets(gp_csv.head(1), \
-# #                                       os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'datasets_01.csv'))
-
-
-
-# # gp_csv.to_csv(os.path.join(Table_Analytics_Hensu.CALC_FOLDER_PATH,'datasets_02.csv'))
-# # print(train_csv.head(2))
-# # print(Table_Analytics_Hensu.DATA_SETS_PATH)
-
-
-# gender_submission.csvの概観
-# print(gp_csv['Survived'].unique())
-# print(gp_csv.count())
-# print(gp_csv[gp_csv['Survived']==0].count())
-# print(gp_csv[gp_csv['Survived']==1].count())
+                                file_name),calc_param)
